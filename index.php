@@ -1,5 +1,7 @@
 <?php 
 
+$s = microtime(TRUE);
+
 /* Important constants to be used by the application */
 define('BASE_PATH',    __DIR__ . '/');
 define('PUBLIC_PATH',  __DIR__ . '/');
@@ -15,3 +17,11 @@ require_once(APP_PATH . 'App.php');
 $Application = new \Ignite\App();
 
 $Application->run();
+
+$e = microtime(TRUE);
+
+?>
+
+<script>
+    console.log('<?php echo $e - $s ?>ms');
+</script>
