@@ -1,4 +1,4 @@
-<?php namespace Ignition\Config;
+<?php namespace Ignite\Config;
 
 /* -> Security Configuration.
 -- This configuration array controls various security related features of the CMS.

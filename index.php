@@ -17,6 +17,6 @@ define('CONTENT_PATH', STORAGE_PATH . 'app/');
 require_once(BASE_PATH . 'vendor/autoload.php');
 require_once(APP_PATH . 'App.php');
 
-$Application = new \Ignition\App();
+$Application = new \Ignite\App();
 
 $Application->run();

@@ -20,8 +20,8 @@
             "App/Helpers/themes.php"
         ],
         "psr-4": {
-            "Ignition\\": "App/",
-            "Application\\": "plugins/"
+            "Ignite\\": "App/",
+            "App\\": "plugins/"
         }
     }
 }

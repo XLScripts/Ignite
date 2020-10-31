@@ -1,4 +1,4 @@
-<?php namespace Ignition\Config;
+<?php namespace Ignite\Config;
 
 /* -> CMS Configuration.
 -- These settings are related to the Content-Management-System.

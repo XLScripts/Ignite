@@ -1,4 +1,4 @@
-<?php namespace Ignition\Config;
+<?php namespace Ignite\Config;
 
 /* -> App Configuration.
 -- Configure settings of the application.
@@ -10,7 +10,7 @@ return [
     'debug' => true,
 
     // Application Base URL
-    'base_url' => 'http://localhost/',
+    'base_url' => 'https://ignition.test/',
 
     // Information about the current application.
     'name'    => 'Ignition-CMS',

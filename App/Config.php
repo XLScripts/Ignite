@@ -1,4 +1,4 @@
-<?php namespace Ignition;
+<?php namespace Ignite;
 
 class Config {
     public $app;

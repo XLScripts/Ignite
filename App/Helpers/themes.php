@@ -1,19 +1,19 @@
-<?php namespace Ignition\Helpers;
+<?php namespace Ignite\Helpers;
 
 if(!function_exists('theme_data')) {
     function theme_data($name, $settings) {
         if(
             \file_exists(STORAGE_PATH . 'sys/theme-data/' . $name . '.json')
         ) {
-            $data = \json_decode(\file_get_contents(STORAGE_PATH . 'sys/theme-data/' . $name . '.json'));
+            $data = \json_decode(\file_get_contents(STORAGE_PATH . 'sys/theme-data/' . $name . '.json'), true);
             $write = false;
             foreach($settings as $setting => $values) {
-                if(!isset($data->{$setting})) {
+                if(!isset($data[$setting])) {
                     $write = true;
-                    if(is_object($values) && isset($values->default)) {
-                        $data->{$setting} = $values->default;
+                    if(is_array($values) && isset($values['default'])) {
+                        $data[$setting] = $values['default'];
                     } else
-                        $data->{$setting} = $values;
+                        $data[$setting] = $values;
                 }
             }
 
@@ -23,12 +23,12 @@ if(!function_exists('theme_data')) {
 
             return $data;
         } else {
-            $data = new \StdClass();
+            $data = [];
             foreach($settings as $setting => $values) {
-                if(is_object($values) && isset($values->default)) {
-                    $data->{$setting} = $values->default;
+                if(is_object($values) && isset($values['default'])) {
+                    $data[$setting] = $values['default'];
                 } else
-                    $data->{$setting} = null;
+                    $data[$setting] = null;
             }
 
             \file_put_contents(STORAGE_PATH . 'sys/theme-data/' . $name . '.json', \json_encode($data));
@@ -43,15 +43,15 @@ if(!function_exists('plugin_data')) {
         if(
             \file_exists(STORAGE_PATH . 'sys/plugin-data/' . $name . '.json')
         ) {
-            $data = \json_decode(\file_get_contents(STORAGE_PATH . 'sys/plugin-data/' . $name . '.json'));
+            $data = \json_decode(\file_get_contents(STORAGE_PATH . 'sys/plugin-data/' . $name . '.json'), true);
             $write = false;
             foreach($settings as $setting => $values) {
-                if(!isset($data->{$setting})) {
+                if(!isset($data[$setting])) {
                     $write = true;
-                    if(is_object($values) && isset($values->default)) {
-                        $data->{$setting} = $values->default;
+                    if(is_array($values) && isset($values['default'])) {
+                        $data[$setting] = $values['default'];
                     } else
-                        $data->{$setting} = $values;
+                        $data[$setting] = $values;
                 }
             }
 
@@ -61,12 +61,12 @@ if(!function_exists('plugin_data')) {
 
             return $data;
         } else {
-            $data = new \StdClass();
+            $data = [];
             foreach($settings as $setting => $values) {
-                if(is_object($values) && isset($values->default)) {
-                    $data->{$setting} = $values->default;
+                if(is_array($values) && isset($values['default'])) {
+                    $data[$setting] = $values['default'];
                 } else
-                    $data->{$setting} = null;
+                    $data[$setting] = null;
             }
 
             \file_put_contents(STORAGE_PATH . 'sys/plugin-data/' . $name . '.json', \json_encode($data));

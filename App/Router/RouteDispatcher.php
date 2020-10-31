@@ -1,4 +1,4 @@
-<?php namespace Ignition\Router;
+<?php namespace Ignite\Router;
 
 class RouteDispatcher {
     private $route_dispatcher;

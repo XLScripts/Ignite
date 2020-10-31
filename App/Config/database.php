@@ -1,4 +1,4 @@
-<?php namespace Ignition\Config;
+<?php namespace Ignite\Config;
 
 /* -> Database Configuration.
 -- Ignition CMS uses Laravel's Eloquent ORM under the hood.

@@ -1,4 +1,4 @@
-<?php namespace Ignition\Components;
+<?php namespace Ignite\Components;
 
 class PluginBase {
     protected $settings = [];
@@ -10,9 +10,13 @@ class PluginBase {
         if(!$this->name || !$this->shortcode) {
             throw new \Exception('Invalid `name` OR `shortcode` property in Plugin.');
         }
+
+        $this->initialize();
     }
 
-    public function configureSettingsForm($config) {
-        $this->settings = \Ignition\Helpers\plugin_data($this->shortcode, $config);
+    protected function initialize() {}
+
+    protected function configureSettings($config) {
+        $this->settings = \Ignite\Helpers\plugin_data($this->shortcode, $config);
     }
 }

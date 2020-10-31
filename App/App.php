@@ -1,4 +1,4 @@
-<?php namespace Ignition;
+<?php namespace Ignite;
 
 use Illuminate\Database\Capsule\Manager as IlluminateCapsule;
 use Illuminate\Events\Dispatcher;
@@ -58,15 +58,22 @@ class App {
         $this->theme = $this->config->cms['theme'];
 
         if(
-            \file_exists(BASE_PATH . 'themes/' . $this->theme . '/src/meta.json') 
-            && \file_exists(BASE_PATH . 'themes/' . $this->theme . '/src/pages.json')
+            \file_exists(BASE_PATH . 'themes/' . $this->theme . '/src/meta.php') 
+            && \file_exists(BASE_PATH . 'themes/' . $this->theme . '/src/pages.php')
         ) {
-            $this->theme_meta  = json_decode(file_get_contents(BASE_PATH . 'themes/' . $this->theme . '/src/meta.json'));
-            $this->theme_pages = json_decode(file_get_contents(BASE_PATH . 'themes/' . $this->theme . '/src/pages.json'));
+            $this->theme_meta  = require_once(BASE_PATH . 'themes/' . $this->theme . '/src/meta.php');
+            $this->theme_pages = require_once(BASE_PATH . 'themes/' . $this->theme . '/src/pages.php');
         } else
             throw new \Exception("Files Not Found: meta.json & pages.json should be present inside the theme's source directory.");
 
-        $this->theme_data = Helpers\theme_data($this->theme, $this->theme_meta->settings);
+        // print_r([
+        //     'theme' => $this->theme,
+        //     'settings'  => $this->theme_meta,
+        //     'pages'     => $this->theme_pages
+        // ]);
+        // exit;
+
+        $this->theme_data = Helpers\theme_data($this->theme, $this->theme_meta['settings']);
     }
 
     private function initialize_twig() {
@@ -106,16 +113,16 @@ class App {
         $this->twig->addFilter($page_filter);
         $this->twig->addFilter($backend_route_filter);
 
-        $this->twig->addGlobal('theme', [ 'meta' => $this->theme_meta->theme, 'settings' => $this->theme_data ]);
+        $this->twig->addGlobal('theme', [ 'meta' => $this->theme_meta['theme'], 'settings' => $this->theme_data ]);
         $this->twig->addGlobal('config', $this->config);
     }
 
     private function render_page($path, $options, $return = true) {
         $data = $this->twig->render(
-            $options->view,
+            $options['view'],
             [
                 'path'  => $path,
-                'title' => $options->title
+                'title' => $options['title']
             ]
         );
 
@@ -137,9 +144,9 @@ class App {
     }
 
     private function render($params, $path, $options) {
-        if(isset($options->dynamic) && $options->dynamic) {
+        if(isset($options['dynamic']) && $options['dynamic']) {
             $data = [];
-            foreach($options->data as $field => $resolver) {
+            foreach($options['data'] as $field => $resolver) {
                 $split = explode('::', $resolver);
                 $plugin = $split[0];
                 $method = $split[1];
@@ -153,12 +160,12 @@ class App {
         }
 
         $this->twig->addGlobal('uri_params', $params);
-        $this->twig->addGlobal('page', [ 'path' => $path, 'title' => $options->title, 'dynamic' => isset($options->dynamic) && $options->dynamic ? true : false ]);
+        $this->twig->addGlobal('page', [ 'path' => $path, 'title' => $options['title'], 'dynamic' => isset($options['dynamic']) && $options['dynamic'] ? true : false ]);
 
         $page = $this->render_page($path, $options);
 
-        if(isset($options->layout)) {
-            echo $this->render_layout($options->layout, $page);
+        if(isset($options['layout'])) {
+            echo $this->render_layout($options['layout'], $page);
         } else
             echo $page;
     }
@@ -168,8 +175,8 @@ class App {
             $this->config->app['base_url'],
             function(\FastRoute\RouteCollector $routes) {
                 foreach($this->theme_pages as $path => $options) {
-                    if(isset($options->view)) {
-                        $m = isset($options->method) ? $options->method : 'GET';
+                    if(isset($options['view'])) {
+                        $m = isset($options['method']) ? $options['method'] : 'GET';
                         $routes->addRoute($m, $path, function() use ($path, $options) {
                             return [
                                 'path' => $path,

@@ -1,4 +1,4 @@
-<?php namespace Ignition\Components;
+<?php namespace Ignite\Components;
 
 class Cache {
     
