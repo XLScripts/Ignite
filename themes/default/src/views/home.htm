@@ -1,0 +1,28 @@
+<div id="main">
+    <p class="center">
+        <img height="100" width="100" src="{{ 'assets/images/favicon.png'|theme }}" alt="{{ config.app.name }}">
+    </p>
+    <strong>
+        <p class="center">
+            {{ config.app.name }} v{{ config.app.version }}
+        </p>
+    </strong>
+    <br>
+    <p>Welcome to the Default Template.</p>
+    <p>This page ensures that everything is working properly.</p>
+    <br>
+    <p>Currently running:
+        <br>
+        <br>
+        <code>
+            {{ theme.meta.name }} v{{ theme.meta.version }}<br>
+            By {{ theme.meta.author.name }}<br>
+            <br>
+            Try taking a look at this template in: /themes/default/src/views/home.htm
+        </code>
+    </p>
+    <br>
+    <p>
+        <a target="_blank" href="{{ '/'|backend }}">Backend</a> - <a target="_blank" href="{{ theme.meta.author.url }}">GitHub</a>
+    </p>
+</div>

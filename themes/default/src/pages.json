@@ -1,0 +1,7 @@
+{
+    "/": {
+        "title": "Welcome",
+        "view": "views/home.htm",
+        "layout": "base.htm"
+    }
+}
