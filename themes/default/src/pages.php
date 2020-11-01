@@ -2,18 +2,36 @@
 
 return [
     "/" => [
-        "title"   => "Welcome",
-        "view"    => "views/home.htm",
-        "layout"  => "base.htm",
+        "title"  => "Homepage",
+        "view"   => "views/home",
+        "layout" => "layouts/base",
+        "vars" => [
+            "hello" => "hi"
+        ]
     ],
 
-    "/about/{id}" => [
-        'title' => 'About Us',
-        'view'  => 'views/about.htm',
-        'dynamic' => true,
-        'data' => [
-            'users' => 'App\\Demonicious\\TestPlugin::data',
-            'todos' => 'App\\Demonicious\\TestPlugin::todos'
+    "/test" => "Plugins\\Demonicious\\Test::data",
+    "/test2" => [
+        "method"  => "POST",
+        "handler" => "Plugins\\Demonicious\\Test::data"
+    ],
+    "/test3" => [
+        "title"  => "Test Page",
+        "view"   => "views/home",
+        "layout" => "layouts/base",
+        "vars" => [
+            "hello" => "hi"
+        ],
+        "data" => "Plugins\\Demonicious\\Test::data"
+    ],
+
+    "/users" => [
+        "type" => "group",
+        "routes" => [
+            "/"    => [
+                'view' => 'views/user'
+            ],
+            "data" => "Plugins\\Demonicious\\Test::data"
         ]
     ]
 ];

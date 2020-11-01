@@ -1,203 +1,206 @@
 <?php namespace Ignite;
 
-use Illuminate\Database\Capsule\Manager as IlluminateCapsule;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Container\Container;
-
+/*
+* The Base Application class.
+* This class controls the flow of the entire application.
+* You may extend this class to add additional functionality.
+*/
 class App {
-    private $uri;
-    private $method;
+    protected $config;
+    protected $database;
 
-    private $router;
-    private $config;
+    protected $request;
+    protected $response;
 
-    private $theme;
-    private $theme_meta;
-    private $theme_pages;
-    private $theme_data;
+    protected $template_renderer;
 
-    private $twig_loader;
-    private $twig;
-
-    private $page_map;
-
-    public $database;
+    /*
+    * Properties related to the currently Selected Theme. Applies for both Frontend Themes and Backend Themes.
+    * 1 - $meta :- An array containing some information about the theme. 
+    *     -- $meta['theme'] contains the information
+    *     -- $meta['settings] contains the Schema for the Theme User Preferences (Editable in the Backend)
+    * 2 - $pages :- Key-value pairs containing Routes and their options e.g. view, layout, dynamic, data, etc.
+    * 3 - $settings_data :- The currently selected User Preferences based on the schema defined in $meta['settings']
+    */
+    protected $meta          = [];
+    protected $pages         = [];
+    protected $settings_data = [];
 
     public function __construct() {
-        $this->initialize_config();
-        $this->initialize_database();
-        $this->initialize_theme();
-        $this->initialize_twig();
-        $this->initialize_router();
-    }
-
-    private function initialize_config() {
-        $this->uri    = $_SERVER['REQUEST_URI'];
-        $this->method = $_SERVER['REQUEST_METHOD']; 
-
+        /*
+        * -> Load Configuration Files.
+        * -> Establish Database Connection.
+        */
         $this->config   = new Config();
+        $this->database = new Database\Connection($this->config->database);
+
+        /*
+        * Create an \Ignite\Components\IncomingRequest Object - Used for obtaining information about the request.
+        *Create an \Ignite\Components\IncomingRequest Object - Used for composing Outgoing Responses to the client.
+        */
+        $this->request  = new Components\IncomingRequest();
+        $this->response = new Components\OutgoingResponse(); 
+
+        /*
+        * Check if the current URI starts with the Backend Route.
+        * This is used for routing / loading modules related to a certain area rather than everything
+        */
+        $this->is_backend = substr(trim($this->request->getUri(), '/'), 0, strlen($this->config->cms['backend_route'])) == $this->config->cms['backend_route'];
     }
 
-    private function initialize_database() {
-        $this->database = new IlluminateCapsule;
-        $this->database->addConnection(
-            $this->config->database
-        );
-
-        $this->database->setEventDispatcher(
-            new Dispatcher(
-                new Container
-            )
-        );
-
-        $this->database->setAsGlobal();
-        $this->database->bootEloquent();
-    }
-
-    private function initialize_theme() {
-        $this->theme = $this->config->cms['theme'];
+    private function initialize_frontend() {
+        $theme = $this->config->cms['theme'];
 
         if(
-            \file_exists(BASE_PATH . 'themes/' . $this->theme . '/src/meta.php') 
-            && \file_exists(BASE_PATH . 'themes/' . $this->theme . '/src/pages.php')
+            Helpers\file_exists_critical(BASE_PATH . 'themes/' . $theme . '/src/meta.php')
+            && Helpers\file_exists_critical(BASE_PATH . 'themes/' . $theme . '/src/pages.php')
         ) {
-            $this->theme_meta  = require_once(BASE_PATH . 'themes/' . $this->theme . '/src/meta.php');
-            $this->theme_pages = require_once(BASE_PATH . 'themes/' . $this->theme . '/src/pages.php');
-        } else
-            throw new \Exception("Files Not Found: meta.json & pages.json should be present inside the theme's source directory.");
-
-        // print_r([
-        //     'theme' => $this->theme,
-        //     'settings'  => $this->theme_meta,
-        //     'pages'     => $this->theme_pages
-        // ]);
-        // exit;
-
-        $this->theme_data = Helpers\theme_data($this->theme, $this->theme_meta['settings']);
-    }
-
-    private function initialize_twig() {
-        $this->twig_loader = new \Twig\Loader\FilesystemLoader(BASE_PATH . 'themes/' . $this->theme . '/src');
-        $this->twig        = new \Twig\Environment($this->twig_loader/*, [
-            'cache' => STORAGE_PATH . 'sys/cache/twig'
-        ]*/);
-
-        $backend_filter = new \Twig\TwigFilter('backend_assets', function($string) {
-            return $this->config->app['base_url'] . STORAGE_PATH . 'backend/' . $string;
-        });
-
-        $content_filter = new \Twig\TwigFilter('content', function($string) {
-            return $this->config->app['base_url'] . STORAGE_PATH . 'app/' . $string;
-        });
-
-        $theme_filter = new \Twig\TwigFilter('theme', function($string) {
-            return $this->config->app['base_url'] . 'themes/' . $this->theme . '/' . $string;
-        });
-
-        $fragment_filter = new \Twig\TwigFilter('fragment', function($string) {
-            echo $this->twig->render('fragments/' . $string);
-        }, ['is_safe' => ['html']]);
-
-        $page_filter = new \Twig\TwigFilter('page', function($string) {
-            return $this->config->app['base_url'] . trim($string, '/');
-        }, [ 'is_safe' => ['html'] ]);
-
-        $backend_route_filter = new \Twig\TwigFilter('backend', function($string) {
-            return $this->config->app['base_url'] . $this->config->cms['backend_route'] . trim($string, '/');
-        }, [ 'is_safe' => ['html'] ]);
-
-        $this->twig->addFilter($backend_filter);
-        $this->twig->addFilter($content_filter);
-        $this->twig->addFilter($theme_filter);
-        $this->twig->addFilter($fragment_filter);
-        $this->twig->addFilter($page_filter);
-        $this->twig->addFilter($backend_route_filter);
-
-        $this->twig->addGlobal('theme', [ 'meta' => $this->theme_meta['theme'], 'settings' => $this->theme_data ]);
-        $this->twig->addGlobal('config', $this->config);
-    }
-
-    private function render_page($path, $options, $return = true) {
-        $data = $this->twig->render(
-            $options['view'],
-            [
-                'path'  => $path,
-                'title' => $options['title']
-            ]
-        );
-
-        if(!$return)
-            echo $data;
-
-        return $data;
-    }
-
-    private function render_layout($layout, $content, $return = true) {
-        $data = $this->twig->render('layouts/' . $layout, [
-            'content' => $content
-        ]);
-
-        if(!$return)
-            echo $data;
-
-        return $data;
-    }
-
-    private function render($params, $path, $options) {
-        if(isset($options['dynamic']) && $options['dynamic']) {
-            $data = [];
-            foreach($options['data'] as $field => $resolver) {
-                $split = explode('::', $resolver);
-                $plugin = $split[0];
-                $method = $split[1];
-
-                $plugin = new $plugin();
-
-                $data[$field] = $plugin->{$method}($params);
-            }
-
-            $this->twig->addGlobal('data', $data);
+            $this->meta  = require_once(BASE_PATH . 'themes/' . $theme . '/src/meta.php');
+            $this->pages = require_once(BASE_PATH . 'themes/' . $theme . '/src/pages.php');
         }
 
-        $this->twig->addGlobal('uri_params', $params);
-        $this->twig->addGlobal('page', [ 'path' => $path, 'title' => $options['title'], 'dynamic' => isset($options['dynamic']) && $options['dynamic'] ? true : false ]);
+        if(isset($this->meta['requires']) && is_array($this->meta['requires'])) {
+            foreach($this->meta['requires'] as $class) {
+                if(!class_exists($class))
+                    throw new \Exception($class . ' does not exist. ' . $this->meta['theme']['name'] . ' requires this in-order to work.');
+            }
+        }
 
-        $page = $this->render_page($path, $options);
+        $settings_data = Services\DataLoader::Theme($this->meta);
 
-        if(isset($options['layout'])) {
-            echo $this->render_layout($options['layout'], $page);
-        } else
-            echo $page;
+        $this->template_renderer = new Components\TemplateRenderer(
+            $theme,
+            $this->config,
+            BASE_PATH . 'themes/' . $theme . '/src',
+            [
+                'theme' => [
+                    'meta' => $this->meta['theme'],
+                    'settings' => $settings_data
+                ],
+                'config' => $this->config
+            ]
+        );
     }
 
-    private function initialize_router() {
+    private function initialize_backend() {
+        if(
+            Helpers\file_exists_critical(APP_PATH . 'Backend/Theme/meta.php')
+            && Helpers\file_exists_critical(APP_PATH . 'Backend/Theme/pages.php')
+        ) {
+            $this->meta  = require_once(APP_PATH . 'Backend/Theme/meta.php');
+            $this->pages = require_once(APP_PATH . 'Backend/Theme/pages.php');
+        }
+
+        if(isset($this->meta['requires']) && is_array($this->meta['requires'])) {
+            foreach($this->meta['requires'] as $class) {
+                if(!class_exists($class))
+                    throw new \Exception($class . ' does not exist. ' . $this->meta['theme']['name'] . ' requires this in-order to work.');
+            }
+        }
+
+        $settings_data = Services\DataLoader::Theme($this->meta);
+
+        $this->template_renderer = new Components\TemplateRenderer(
+            'backend',
+            $this->config,
+            APP_PATH . 'Backend/Theme',
+            [
+                'theme' => [
+                    'meta' => $this->meta['theme'],
+                    'settings' => $settings_data
+                ],
+                'config' => $this->config
+            ]
+        );
+    }
+
+    protected function traverse_nodes($pages, $routes) {
+        foreach($pages as $path => $passed_options) {
+            $options = [
+                "type"   => 'route',
+                "method" => 'GET',
+                "view"   => null,
+                "layout" => null,
+                "data"   => [],
+                "vars"   => [],
+                "handler" => null,
+                "title"  => 'default',
+                "routes" => [],
+            ];
+
+            if(is_array($passed_options)) {
+                foreach($passed_options as $option => $value) {
+                    $options[$option] = $value;
+                }
+            } else 
+                $options['handler'] = $passed_options;
+
+            if($options['type'] == 'group') {
+                $routes->addGroup(Helpers\route_name($path), function($r) use ($options) {
+                    $this->traverse_nodes($options['routes'], $r);
+                });
+            } else {
+                $routes->addRoute($options['method'], Helpers\route_name($path), function() use ($path, $options) {
+                    return [
+                        'path'    => $path,
+                        'options' => $options
+                    ];
+                });   
+            }
+        }
+    }
+
+    protected function establish_routes() {
         $this->router = new Router\RouteDispatcher(
             $this->config->app['base_url'],
             function(\FastRoute\RouteCollector $routes) {
-                foreach($this->theme_pages as $path => $options) {
-                    if(isset($options['view'])) {
-                        $m = isset($options['method']) ? $options['method'] : 'GET';
-                        $routes->addRoute($m, $path, function() use ($path, $options) {
-                            return [
-                                'path' => $path,
-                                'options' => $options
-                            ];
-                        });   
-                    }
-                }
+                $this->traverse_nodes($this->pages, $routes);
             }
         );
     }
 
     public function run() {
+        /*
+        * If the current route is a Backend Route, then we only load files with the Backend.
+        */
+        if($this->is_backend)
+            $this->initialize_backend();
+        /*
+        * Else we load the files related to the currently selected theme.
+        */
+        else
+            $this->initialize_frontend();
+
+        $this->establish_routes();
+
+        /*
+        * The dispatch method will take in the URI & Method. It returns information about the current route.
+        */
         $this->router->dispatch(
-            $this->method,
-            $this->uri
+            $this->request->getMethod(),
+            $this->request->getUri()
         );
 
-        if($this->router->current['success']) {
-            $route = $this->router->current['handler']();
-            $this->render($this->router->current['params'], $route['path'], $route['options']);
+        /*
+        * If the Route matches properly, we call the route handler that returns the Path / Templates to render.
+        * This information is passed to the template renderer which returns an HTML String.
+        * This string is then set as the response body, and the response is sent to the Client.
+        */
+        if($this->router->current->success) {
+            $route_info = $this->router->current->handler();
+            $this->response->setBody(
+                $this->template_renderer->render(
+                    $route_info,
+                    $this->router->current->params
+                )
+            );
         }
+        /*
+        * Else, we report some errors.
+        */
+        else 
+            $this->response->setStatus(404, 'Not Found')->setBody('Not Found.');
+
+        $this->response->send();
     }
 }

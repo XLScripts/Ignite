@@ -7,12 +7,12 @@ return [
         "version" => "1.0.0",
         "author" => [
             "name" => "Demonicious",
-            "url" => "https=>//github.com/demonicious"
+            "url" => "https://github.com/demonicious"
         ]
     ],
 
-    "requires"=> [
-        "App\\Demonicious\\TestPlugin"
+    "requires" => [
+        "Plugins\\Demonicious\\Test"
     ],
 
     "settings" => [

@@ -17,11 +17,11 @@
     },
     "autoload": {
         "files": [
-            "App/Helpers/themes.php"
+            "App/Helpers/paths.php"
         ],
         "psr-4": {
             "Ignite\\": "App/",
-            "App\\": "plugins/"
+            "Plugins\\": "plugins/"
         }
     }
 }

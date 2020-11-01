@@ -16,42 +16,24 @@ class RouteDispatcher {
         }
         $uri  = \trim(\rawurldecode($uri));
         if(strlen($uri) > 1)
-            $uri = rtrim($uri, '/');
-
-
+            $uri = trim($uri, '/');
 
         $info = $this->route_dispatcher->dispatch(
             $method, $uri
         );
 
         switch($info[0]) {
+            case \FastRoute\Dispatcher::FOUND:
+                $this->current = new Route(true, 200, $info[1], $info[2]);
+            break;
             case \FastRoute\Dispatcher::NOT_FOUND:
-                $this->current = [
-                    'code' => 404,
-                    'message' => 'Not Found',
-                    'success' => false
-                ];
+                $this->current = new Route(false, 404);
             break;
             case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-                $this->current = [
-                    'code' => 405,
-                    'message' => 'Method Not Allowed',
-                    'success' => false
-                ];
-            break;
-            case \FastRoute\Dispatcher::FOUND:
-                $this->current = [
-                    'success' => true,
-                    'handler' => $info[1],
-                    'params'  => $info[2]
-                ];
+                $this->current = new Route(false, 405);
             break;
             default:
-                $this->current = [
-                    'code' => 500,
-                    'message' => 'Internal Server Error',
-                    'success' => false
-                ];
+                $this->current = new Route(false, 500);
             break;
         }
     }
