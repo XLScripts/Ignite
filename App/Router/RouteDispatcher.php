@@ -16,7 +16,7 @@ class RouteDispatcher {
         }
         $uri  = \trim(\rawurldecode($uri));
         if(strlen($uri) > 1)
-            $uri = trim($uri, '/');
+            $uri = \rtrim($uri, '/');
 
         $info = $this->route_dispatcher->dispatch(
             $method, $uri

@@ -117,7 +117,6 @@ class App {
     protected function traverse_nodes($pages, $routes) {
         foreach($pages as $path => $passed_options) {
             $options = [
-                "type"   => 'route',
                 "method" => 'GET',
                 "view"   => null,
                 "layout" => null,
@@ -125,7 +124,7 @@ class App {
                 "vars"   => [],
                 "handler" => null,
                 "title"  => 'default',
-                "routes" => [],
+                "pages" => [],
             ];
 
             if(is_array($passed_options)) {
@@ -135,17 +134,18 @@ class App {
             } else 
                 $options['handler'] = $passed_options;
 
-            if($options['type'] == 'group') {
-                $routes->addGroup(Helpers\route_name($path), function($r) use ($options) {
-                    $this->traverse_nodes($options['routes'], $r);
+
+            $routes->addRoute($options['method'], Helpers\route_name($path), function() use ($path, $options) {
+                return [
+                    'path'    => $path,
+                    'options' => $options
+                ];
+            });   
+            
+            if(!empty($options['pages'])) {
+                $routes->addGroup(Helpers\route_name($path), function($group) use ($options) {
+                    $this->traverse_nodes($options['pages'], $group);
                 });
-            } else {
-                $routes->addRoute($options['method'], Helpers\route_name($path), function() use ($path, $options) {
-                    return [
-                        'path'    => $path,
-                        'options' => $options
-                    ];
-                });   
             }
         }
     }

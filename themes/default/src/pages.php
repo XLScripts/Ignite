@@ -1,7 +1,7 @@
 <?php 
 
 return [
-    "/" => [
+    /* "/" => [
         "title"  => "Homepage",
         "view"   => "views/home",
         "layout" => "layouts/base",
@@ -23,14 +23,12 @@ return [
             "hello" => "hi"
         ],
         "data" => "Plugins\\Demonicious\\Test::data"
-    ],
+    ], */
 
     "/users" => [
-        "type" => "group",
-        "routes" => [
-            "/"    => [
-                'view' => 'views/user'
-            ],
+        'view' => 'views/user',
+
+        "pages" => [
             "data" => "Plugins\\Demonicious\\Test::data"
         ]
     ]

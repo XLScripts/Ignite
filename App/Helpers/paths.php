@@ -88,14 +88,6 @@ if(!function_exists('plugin_data')) {
 if(!function_exists('route_name')) {
     function route_name($name) {
         $name = trim($name, '/');
-        $len = strlen($name);
-        if($len)
-            if($name[$len - 1] == '/')
-                $name = substr($name, 0, $len - 1);
-
-        //if($name != '')
-            return '/' . $name;
-        //else
-            // return $name;
+        return '/' . $name;
     }
 }
