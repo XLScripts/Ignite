@@ -14,4 +14,11 @@ class Test extends \Ignite\Base\Plugin {
 
         $this->response->send();
     }
+
+    public function about($uri_params, $vars) {
+        return [
+            'username' => 'test',
+            'password' => 'test123'
+        ];
+    }
 }

@@ -10,7 +10,7 @@ return [
     'debug' => true,
 
     // Application Base URL
-    'base_url' => 'https://ignition.proj/',
+    'base_url' => 'https://ignition.dev.x/',
 
     // Information about the current application.
     'name'    => 'Ignition-CMS',

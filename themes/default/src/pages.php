@@ -1,7 +1,7 @@
 <?php 
 
 return [
-    /* "/" => [
+    "/" => [
         "title"  => "Homepage",
         "view"   => "views/home",
         "layout" => "layouts/base",
@@ -10,20 +10,13 @@ return [
         ]
     ],
 
-    "/test" => "Plugins\\Demonicious\\Test::data",
-    "/test2" => [
-        "method"  => "POST",
-        "handler" => "Plugins\\Demonicious\\Test::data"
+    "/about/{id}" => [
+        'view' => 'views/about',
+        'layout' => 'layouts/base',
+        'data' => [
+            'user' => 'Plugins\\Demonicious\\Test::about'
+        ]
     ],
-    "/test3" => [
-        "title"  => "Test Page",
-        "view"   => "views/home",
-        "layout" => "layouts/base",
-        "vars" => [
-            "hello" => "hi"
-        ],
-        "data" => "Plugins\\Demonicious\\Test::data"
-    ], */
 
     "/users" => [
         'view' => 'views/user',
