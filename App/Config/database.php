@@ -1,7 +1,7 @@
 <?php namespace Ignite\Config;
 
-/* -> Database Configuration.
--- Ignition CMS uses Laravel's Eloquent ORM under the hood.
+/* Database Configuration.
+-- Ignite CMS uses Laravel's Eloquent ORM under the hood.
 -- This configuration array represents exactly what is passed to the connection.
 -- The default connection will be created using the details blow.
 
@@ -11,12 +11,12 @@
 */
 
 return [
-    'driver'    => 'mysql',
+    'driver'    => 'sqlite',
     'host'      => 'localhost',
     'port'      => 3306,
-    'database'  => 'ignition-db',
     'username'  => 'root',
     'password'  => '',
+    'database'  => 'ignite_db',
     'charset'   => 'utf8',
     'collation' => 'utf8_unicode_ci',
     'prefix'    => 'ig_',
