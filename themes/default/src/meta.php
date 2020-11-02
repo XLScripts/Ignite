@@ -1,28 +1,19 @@
 <?php
 
 return [
-    "theme" => [
-        "name" => "Ignition-CMS Theme",
-        "shortcode" => "default",
-        "version" => "1.0.0",
-        "author" => [
-            "name" => "Demonicious",
-            "url" => "https://github.com/demonicious"
-        ]
+    'theme' => [
+        'name' => 'Default Theme',
+        'shortcode' => 'ig-default-theme'
     ],
 
-    "requires" => [
-        "Plugins\\Demonicious\\Test"
+    'requires' => [
+        'Plugins\\Demonicious\\OrderTracker'
     ],
 
-    "settings" => [
-        "title" => [
-            "type" => "string",
-            "default" => "Ignition-CMS Website"
-        ],
-        "gtag_id" => [
-            "type" => "string",
-            "default" => null
+    'settings' => [
+        'gtag_id' => [
+            'type' => 'string',
+            'default' => null
         ]
     ]
 ];

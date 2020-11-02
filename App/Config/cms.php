@@ -13,5 +13,7 @@ return [
     'backend_route' => 'backend',
 
     // The theme to use for the website. This parameter is not stored in the database, and can be edited here.
-    'theme' => 'default'
+    'theme' => 'default',
+
+    'site_title' => "My Website"
 ];

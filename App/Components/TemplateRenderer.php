@@ -121,6 +121,10 @@ class TemplateRenderer {
         ]);
     }
 
+    public function render_file($path, $params) {
+        return $this->twig->render($this->safeName($path), $params);
+    }
+
     public function render($route_info, $params) {
         if($route_info['options']['handler'])
             $this->callPluginHandler($route_info['options']['handler'], $params, $route_info['options']['vars']);
@@ -139,9 +143,9 @@ class TemplateRenderer {
                 'params'  => $params,
                 'vars'    => $route_info['options']['vars'],
                 'data'    => $data,
-                'dynamic' => count($data) > 0
+                'dynamic' => is_array($data) && count($data) > 0
             ]);
-    
+
             $page = $this->render_page($route_info['options']['view']);
     
             if($route_info['options']['layout']) {

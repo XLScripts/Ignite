@@ -1,28 +1,21 @@
-<?php 
+<?php
 
 return [
     "/" => [
-        "title"  => "Homepage",
-        "view"   => "views/home",
-        "layout" => "layouts/base",
-        "vars" => [
-            "hello" => "hi"
-        ]
-    ],
-
-    "/about/{id}" => [
-        'view' => 'views/about',
+        'title'  => 'Home',
+        'view'   => 'views/home',
         'layout' => 'layouts/base',
         'data' => [
-            'user' => 'Plugins\\Demonicious\\Test::about'
+            'todos' => 'Plugins\\Demonicious\\OrderTracker::data'
         ]
     ],
 
-    "/users" => [
-        'view' => 'views/user',
-
-        "pages" => [
-            "data" => "Plugins\\Demonicious\\Test::data"
+    "/about" => [
+        'title'   => 'About',
+        'view'    => 'views/about',
+        'layouts' => 'layouts/base',
+        'data' => [
+            'widget' => 'Plugins\\Demonicious\\OrderTracker::widget'
         ]
     ]
 ];
